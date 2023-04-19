@@ -1,12 +1,14 @@
-let recordBtn=document.querySelector(".record-btn")
-let recordBtnCont=document.querySelector(".record-btn-cont")
-let captureBtn=document.querySelector(".capture-btn")
-let captureBtnCont=document.querySelector(".capture-btn-cont")
-let timerCont = document.querySelector(".timer-cont");
-let timer = document.querySelector(".timer");
-let video = document.querySelector("video");
+var uid = new ShortUniqueId();
+const recordBtn = document.querySelector(".record-btn");
+const recordBtnCont=document.querySelector(".record-btn-cont")
+const captureBtn=document.querySelector(".capture-btn")
+const captureBtnCont=document.querySelector(".capture-btn-cont")
+const timerCont = document.querySelector(".timer-cont");
+const timer = document.querySelector(".timer");
+const video = document.querySelector("video");
 let filterColor = "transparent";
-let constraints = {
+const gallery = document.querySelector(".gallery");
+const constraints = {
     video: true,
     audio: true
 }
@@ -19,7 +21,7 @@ navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
     mediaRecorder = new MediaRecorder(stream);
 
     mediaRecorder.addEventListener("start", () => {
-        console.log("rec started");
+        chunks = [];
     });
     mediaRecorder.addEventListener("dataavailable", (e) => {
         chunks.push(e.data); 
@@ -28,15 +30,23 @@ navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
     })
 
      mediaRecorder.addEventListener("stop", () => {
-         console.log("rec stopped");
          let blob = new Blob(chunks, { type: "video/mp4" });
          let videoURL = URL.createObjectURL(blob);
-         console.log(videoURL);
+       
+         if (db) {
+             let videoID = uid();
+             let dbTransaction=db.transaction("video", "readwrite");
+             let videoStore = dbTransaction.objectStore("video");
+             let videoEntry = {
+               id: videoID,
+               blobData: blob,
+             };
+             let addRequest = videoStore.add(videoEntry); 
+             addRequest.onsuccess = function () {
+               
+             };
 
-         let a = document.createElement("a");
-         a.href = videoURL;
-         a.download="myVideo.mp4"
-         a.click();
+         }
      });
 })
 
@@ -93,8 +103,6 @@ function stopTimer() {
     timer.style.display = "none";
 }
 
-
-
 captureBtnCont.addEventListener("click", function(){
     captureBtn.classList.add("scale-capture");
     //canvas 
@@ -110,12 +118,19 @@ captureBtnCont.addEventListener("click", function(){
 
 
 
-    let image = canvas.toDataURL("image/jpeg");
-
-     let a = document.createElement("a");
-     a.href = image;
-     a.download = "myPic.jpeg";
-     a.click();
+    let imageURL = canvas.toDataURL("image/jpeg");
+    if (db) {
+      let imageID = uid();
+      let dbTransaction=db.transaction("image", "readwrite");
+      let imageStore = dbTransaction.objectStore("image");
+      let imageEntry = {
+        id: `img-${imageID}`,
+        url: imageURL,
+      };
+      let addRequest = imageStore.add(imageEntry);
+      addRequest.onsuccess = function () {
+      };
+    }
 
     setTimeout(() => {
         captureBtn.classList.remove("scale-capture")
@@ -130,4 +145,8 @@ allFilters.forEach((filterEle) => {
         filterColor = window.getComputedStyle(filterEle).getPropertyValue('background-color');
         filterLayer.style.backgroundColor = filterColor;
     });
+});
+
+gallery.addEventListener("click", () => {
+  location.assign("./gallery.html");
 });
