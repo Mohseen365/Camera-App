@@ -113,7 +113,7 @@ function downloadListener(e) {
 
       let a = document.createElement("a");
       a.href = url;
-      a.download = `${id}.png`;
+      a.download = `${id}.mp4`;
       a.click();
       a.remove();
     };
