@@ -113,7 +113,7 @@ function downloadListener(e) {
 
       let a = document.createElement("a");
       a.href = url;
-      a.download = `${id}.mp4`;
+      a.download = `${id}.png`;
       a.click();
       a.remove();
     };
@@ -127,7 +127,7 @@ function downloadListener(e) {
       let url = URL.createObjectURL(videoResult.blobData);
       let a = document.createElement("a");
       a.href = url;
-      a.download = `img-${id}.png`;
+      a.download = `img-${id}.mp4`;
       a.click();
       a.remove();
     };
